@@ -317,60 +317,54 @@ object ElginPrintManager {
 
     private fun enviarBytes(context: Context, config: PrintConfig, data: ByteArray) {
         when (config.connectionType) {
-            ConnectionType.TCP_IP    -> Socket(config.ip, config.port).use { s ->
-                s.soTimeout = 5000; s.getOutputStream().run { write(data); flush() }
-            }
-            ConnectionType.BLUETOOTH -> {
-                if (config.btAddress.isBlank()) throw IllegalStateException("Endereço Bluetooth não configurado")
-                val socket = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-                    .getRemoteDevice(config.btAddress)
-                    .createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
-                socket.connect()
-                socket.outputStream.use { it.write(data); it.flush() }
-                socket.close()
-            }
-            ConnectionType.USB -> printViaUsb(context, String(data, Charsets.ISO_8859_1))
+            ConnectionType.TCP_IP    -> tcpEnviar(config.ip, config.port, data)
+            ConnectionType.BLUETOOTH -> btEnviar(config.btAddress, data)
+            ConnectionType.USB       -> usbEnviar(context, data)
         }
     }
 
     private fun enviar(context: Context, config: PrintConfig, zpl: String) {
         when (config.connectionType) {
-            ConnectionType.TCP_IP -> printViaTcp(config.ip, config.port, zpl)
-            ConnectionType.BLUETOOTH -> printViaBluetooth(context, config.btAddress, zpl)
-            ConnectionType.USB -> printViaUsb(context, zpl)
+            ConnectionType.TCP_IP    -> tcpEnviar(config.ip, config.port, zpl.toByteArray(Charsets.UTF_8))
+            ConnectionType.BLUETOOTH -> btEnviar(config.btAddress, zpl.toByteArray(Charsets.UTF_8))
+            ConnectionType.USB       -> usbEnviar(context, zpl.toByteArray(Charsets.UTF_8))
         }
     }
 
-    private fun printViaTcp(ip: String, port: Int, zpl: String) {
-        Socket(ip, port).use { socket ->
+    private fun tcpEnviar(ip: String, port: Int, data: ByteArray) {
+        if (ip.isBlank()) throw IllegalStateException("IP não configurado. Acesse as configurações.")
+        Socket().use { socket ->
+            socket.connect(java.net.InetSocketAddress(ip, port), 5000)
             socket.soTimeout = 5000
-            socket.getOutputStream().apply { write(zpl.toByteArray(Charsets.UTF_8)); flush() }
+            socket.getOutputStream().run { write(data); flush() }
         }
     }
 
-    private fun printViaBluetooth(context: Context, address: String, zpl: String) {
-        if (address.isBlank()) throw IllegalStateException("Endereço Bluetooth não configurado")
+    private fun btEnviar(address: String, data: ByteArray) {
+        if (address.isBlank()) throw IllegalStateException("Endereço Bluetooth não configurado.")
         val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
             ?: throw IllegalStateException("Bluetooth não disponível")
-        val socket = adapter.getRemoteDevice(address)
+        val btSocket = adapter.getRemoteDevice(address)
             .createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
-        socket.connect()
-        socket.outputStream.use { it.write(zpl.toByteArray(Charsets.UTF_8)); it.flush() }
-        socket.close()
+        try {
+            btSocket.connect()
+            btSocket.outputStream.run { write(data); flush() }
+        } finally {
+            btSocket.close()
+        }
     }
 
-    private fun printViaUsb(context: Context, zpl: String) {
+    private fun usbEnviar(context: Context, data: ByteArray) {
         val usbManager = context.getSystemService(Context.USB_SERVICE) as android.hardware.usb.UsbManager
         val device = usbManager.deviceList.values.firstOrNull()
             ?: throw IllegalStateException("Nenhuma impressora USB encontrada")
         val connection = usbManager.openDevice(device)
-            ?: throw IllegalStateException("Sem permissão USB")
+            ?: throw IllegalStateException("Sem permissão USB. Reconecte o cabo e tente novamente.")
         val iface = device.getInterface(0)
         val endpoint = (0 until iface.endpointCount).map { iface.getEndpoint(it) }
             .firstOrNull { it.direction == android.hardware.usb.UsbConstants.USB_DIR_OUT }
             ?: throw IllegalStateException("Endpoint USB não encontrado")
         connection.claimInterface(iface, true)
-        val data = zpl.toByteArray(Charsets.UTF_8)
         connection.bulkTransfer(endpoint, data, data.size, 5000)
         connection.releaseInterface(iface)
         connection.close()
