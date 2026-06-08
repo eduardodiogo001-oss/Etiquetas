@@ -125,10 +125,8 @@ object ElginPrintManager {
                     val boxH = fs + 18          // altura total da caixa
                     val bx = margin             // x da caixa externa
                     val bw = w - margin * 2     // largura da caixa
-                    // contorno externo
+                    // contorno único
                     append("^FO$bx,$y^GB$bw,$boxH,1^FS\n")
-                    // contorno interno (linha dupla: 3px de gap)
-                    append("^FO${bx + 3},${y + 3}^GB${bw - 6},${boxH - 6},1^FS\n")
                     // texto centralizado dentro da caixa
                     val ty = y + (boxH - fs) / 2
                     append("^FO$bx,$ty^FB$bw,1,,C^A0N,$fs,$fs^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
