@@ -25,6 +25,7 @@ data class EtiquetaTemplate(
     val mostrarDataProducao: Boolean = true,
     val mostrarDataValidade: Boolean = true,
     val mostrarDiasValidade: Boolean = false,
+    val mostrarArmazenamento: Boolean = true,
     val labelProducao: String = "Produção:",
     val labelValidade: String = "Validade:",
 

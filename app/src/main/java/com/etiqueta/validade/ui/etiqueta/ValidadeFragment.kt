@@ -119,19 +119,23 @@ class ValidadeFragment : Fragment() {
         val validade = viewModel.calcularValidade(produto, dataProducao)
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_imprimir, null)
 
-        val tvNomeLoja   = view.findViewById<TextView>(R.id.tvDialogNomeLoja)
-        val dividerLoja  = view.findViewById<View>(R.id.dividerLoja)
-        val tvProduto    = view.findViewById<TextView>(R.id.tvDialogProduto)
-        val tvAbertura   = view.findViewById<TextView>(R.id.tvDialogAbertura)
-        val tvValidade   = view.findViewById<TextView>(R.id.tvDialogValidade)
-        val tvDias       = view.findViewById<TextView>(R.id.tvDialogDias)
-        val ivLogo       = view.findViewById<android.widget.ImageView>(R.id.ivDialogLogo)
-        val tvDimensoes  = view.findViewById<TextView>(R.id.tvDialogDimensoes)
+        val tvNomeLoja      = view.findViewById<TextView>(R.id.tvDialogNomeLoja)
+        val dividerLoja     = view.findViewById<View>(R.id.dividerLoja)
+        val tvProduto       = view.findViewById<TextView>(R.id.tvDialogProduto)
+        val tvArmazenamento = view.findViewById<TextView>(R.id.tvDialogArmazenamento)
+        val tvAbertura      = view.findViewById<TextView>(R.id.tvDialogAbertura)
+        val tvValidade      = view.findViewById<TextView>(R.id.tvDialogValidade)
+        val tvDias          = view.findViewById<TextView>(R.id.tvDialogDias)
+        val ivLogo          = view.findViewById<android.widget.ImageView>(R.id.ivDialogLogo)
+        val tvDimensoes     = view.findViewById<TextView>(R.id.tvDialogDimensoes)
 
         tvProduto.text  = produto.nome
         tvAbertura.text = "Produção: ${fmt.format(dataProducao)}"
         tvValidade.text = "Validade: ${fmt.format(validade)}"
         tvDias.text     = "${produto.diasValidade} dias"
+        if (produto.formaArmazenamento.isNotBlank()) {
+            tvArmazenamento.text = produto.formaArmazenamento
+        }
 
         fun aplicarTemplate(t: EtiquetaTemplate) {
             // Nome da loja
@@ -158,10 +162,11 @@ class ValidadeFragment : Fragment() {
             }
 
             // Campos de texto
-            tvProduto.visibility  = if (t.mostrarNomeProduto)  View.VISIBLE else View.GONE
-            tvAbertura.visibility = if (t.mostrarDataProducao) View.VISIBLE else View.GONE
-            tvValidade.visibility = if (t.mostrarDataValidade) View.VISIBLE else View.GONE
-            tvDias.visibility     = if (t.mostrarDiasValidade) View.VISIBLE else View.GONE
+            tvProduto.visibility       = if (t.mostrarNomeProduto)  View.VISIBLE else View.GONE
+            tvArmazenamento.visibility = if (t.mostrarArmazenamento && produto.formaArmazenamento.isNotBlank()) View.VISIBLE else View.GONE
+            tvAbertura.visibility      = if (t.mostrarDataProducao) View.VISIBLE else View.GONE
+            tvValidade.visibility      = if (t.mostrarDataValidade) View.VISIBLE else View.GONE
+            tvDias.visibility          = if (t.mostrarDiasValidade) View.VISIBLE else View.GONE
 
             // Dimensões
             tvDimensoes.text = "${t.larguraMm} × ${t.alturaMm} mm"
@@ -206,6 +211,7 @@ class ValidadeFragment : Fragment() {
                         putExtra("produto_dias", produto.diasValidade)
                         putExtra("produto_categoria", produto.categoria)
                         putExtra("produto_obs", produto.observacao)
+                        putExtra("produto_armazenamento", produto.formaArmazenamento)
                     })
                     1 -> AlertDialog.Builder(requireContext())
                         .setTitle("Excluir \"${produto.nome}\"?")

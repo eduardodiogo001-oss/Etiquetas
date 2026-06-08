@@ -44,10 +44,11 @@ object ElginPrintManager {
 
     fun imprimirValidade(
         context: Context, config: PrintConfig,
-        nomeProduto: String, dataProducao: Date, dataValidade: Date,
+        nomeProduto: String, formaArmazenamento: String = "",
+        dataProducao: Date, dataValidade: Date,
         copias: Int, template: EtiquetaTemplate
     ) {
-        val zpl = buildZplValidade(context, template, nomeProduto, dataProducao, dataValidade, copias)
+        val zpl = buildZplValidade(context, template, nomeProduto, formaArmazenamento, dataProducao, dataValidade, copias)
         enviar(context, config, zpl)
     }
 
@@ -66,61 +67,77 @@ object ElginPrintManager {
 
     private fun buildZplValidade(
         context: Context, t: EtiquetaTemplate,
-        nomeProduto: String, producao: Date, validade: Date, copias: Int
+        nomeProduto: String, formaArmazenamento: String,
+        producao: Date, validade: Date, copias: Int
     ): String {
         val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
         val w = t.larguraMm * 8
         val h = t.alturaMm * 8
+        val margin = 8
         return buildString {
             repeat(copias) {
                 append("^XA\n^PW$w\n^LL$h\n^CI28\n")
 
-                var y = 8
+                var y = margin
 
-                // Logo
-                if (t.mostrarLogo && t.logoPath.isNotBlank()) {
-                    val logoZpl = logoToZpl(t.logoPath, h - 16, 40)
-                    if (logoZpl != null) {
-                        append("^FO${w - 48},8$logoZpl\n")
-                    }
+                // ── Nome da loja (topo, se configurado) ──────────────────────
+                if (t.nomeLoja.isNotBlank()) {
+                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,18,18^FD${t.nomeLoja}^FS\n")
+                    y += 22
+                    append("^FO$margin,$y^GB${w - margin * 2},1,1^FS\n")
+                    y += 5
                 }
 
-                // Nome da loja
-                if (t.nomeLoja.isNotBlank()) {
-                    append("^FO10,$y^A0N,20,20^FD${t.nomeLoja}^FS\n")
-                    y += 26
-                    append("^FO8,$y^GB${w - 16},1,1^FS\n")
+                // ── Nome do produto: centralizado, negrito, grande ────────────
+                if (t.mostrarNomeProduto) {
+                    val fs = t.tamanhoFonteNome
+                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,$fs,$fs^FD${nomeProduto.take(24)}^FS\n")
+                    y += fs + 4
+                    // linha de destaque abaixo do nome
+                    append("^FO$margin,$y^GB${w - margin * 2},2,2^FS\n")
                     y += 6
                 }
 
-                // Nome do produto
-                if (t.mostrarNomeProduto) {
-                    val fs = t.tamanhoFonteNome
-                    append("^FO10,$y^A0N,$fs,$fs^FD${nomeProduto.take(20)}^FS\n")
-                    y += fs + 6
+                // ── Forma de armazenamento ────────────────────────────────────
+                if (t.mostrarArmazenamento && formaArmazenamento.isNotBlank()) {
+                    val fd = t.tamanhoFonteDatas
+                    append("^FO$margin,$y^A0N,$fd,$fd^FD$formaArmazenamento^FS\n")
+                    y += fd + 4
                 }
 
-                append("^FO8,$y^GB${w - 16},1,1^FS\n")
-                y += 6
-
-                val fd = t.tamanhoFonteDatas
-
-                // Data de produção
+                // ── Data de produção ──────────────────────────────────────────
                 if (t.mostrarDataProducao) {
-                    append("^FO10,$y^A0N,$fd,$fd^FD${t.labelProducao} ${fmt.format(producao)}^FS\n")
+                    val fd = t.tamanhoFonteDatas
+                    append("^FO$margin,$y^A0N,$fd,$fd^FD${t.labelProducao} ${fmt.format(producao)}^FS\n")
                     y += fd + 4
                 }
 
-                // Data de validade
-                if (t.mostrarDataValidade) {
-                    append("^FO10,$y^A0N,$fd,$fd^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
-                    y += fd + 4
-                }
-
-                // Dias de validade
+                // ── Dias de validade (opcional) ───────────────────────────────
                 if (t.mostrarDiasValidade) {
                     val diff = ((validade.time - producao.time) / 86400000).toInt()
-                    append("^FO10,$y^A0N,18,18^FDVálido por $diff dias^FS\n")
+                    append("^FO$margin,$y^A0N,18,18^FDVálido por $diff dias^FS\n")
+                    y += 22
+                }
+
+                // ── Data de validade: centralizada, negrito, grande, destaque ─
+                if (t.mostrarDataValidade) {
+                    val fs = t.tamanhoFonteNome
+                    append("^FO$margin,$y^GB${w - margin * 2},2,2^FS\n")
+                    y += 5
+                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,$fs,$fs^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
+                    y += fs + 4
+                }
+
+                // ── Logo: canto inferior direito, sem fundo ───────────────────
+                if (t.mostrarLogo && t.logoPath.isNotBlank()) {
+                    val logoH = minOf(32, h - y - margin)
+                    val logoW = logoH
+                    if (logoH > 4) {
+                        val logoZpl = logoToZpl(t.logoPath, logoH, logoW)
+                        if (logoZpl != null) {
+                            append("^FO${w - logoW - margin},${h - logoH - margin}$logoZpl\n")
+                        }
+                    }
                 }
 
                 append("^XZ\n")

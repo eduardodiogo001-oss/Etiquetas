@@ -53,6 +53,24 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Forma de armazenamento -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forma de armazenamento"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:layout_marginBottom="4dp" />
+
+            <Spinner
+                android:id="@+id/spinnerArmazenamento"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_search"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -47,7 +47,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             _printState.postValue(PrintState.Printing)
             try {
-                ElginPrintManager.imprimirValidade(context, config, produto.nome, dataProducao, validade, copias, template)
+                ElginPrintManager.imprimirValidade(context, config, produto.nome, produto.formaArmazenamento, dataProducao, validade, copias, template)
                 _printState.postValue(PrintState.Success("$copias etiqueta(s) enviadas!"))
             } catch (e: Exception) { _printState.postValue(PrintState.Error(e.message ?: "Erro")) }
         }
