@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Elgin / Bematech: vendor-id 3540 (hex 0x0DD4) -->
+    <usb-device vendor-id="3540" />
+    <!-- Zebra fallback -->
+    <usb-device vendor-id="1208" />
+</resources>

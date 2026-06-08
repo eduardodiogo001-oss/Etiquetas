@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:padding="12dp">
+
+    <!-- Prévia da etiqueta -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#FFFDE7">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRÉVIA DA ETIQUETA"
+                android:textSize="10sp"
+                android:textColor="#9E9E9E"
+                android:letterSpacing="0.1"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvPrevia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="(Nenhuma linha adicionada)"
+                android:textColor="#424242"
+                android:textSize="15sp"
+                android:minHeight="48dp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Botões de ação rápida -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/btnAdicionarLinha"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="+ Linha"
+            android:textSize="13sp"
+            android:backgroundTint="@color/primary" />
+
+        <Button
+            android:id="@+id/btnPersonalizar"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:text="⚙ Layout"
+            android:textSize="13sp"
+            android:backgroundTint="#607D8B" />
+
+        <Button
+            android:id="@+id/btnCarregarTemplate"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="📂"
+            android:textSize="18sp"
+            android:backgroundTint="#78909C" />
+    </LinearLayout>
+
+    <!-- Lista de linhas -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerLinhas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Botões inferiores -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnSalvarTemplate"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="💾 Salvar"
+            android:backgroundTint="#546E7A" />
+
+        <Button
+            android:id="@+id/btnImprimir"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="2"
+            android:text="🖨 Imprimir Etiqueta"
+            android:backgroundTint="@color/accent" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/primary"
+        app:titleTextColor="@android:color/white" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Nome do template -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Nome do template" android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNomeTemplate"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Nome da loja -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Nome do estabelecimento (aparece no topo)" android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etNomeLoja"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Tamanho -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:hint="Largura (mm)" android:layout_marginEnd="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etLargura" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:hint="Altura (mm)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAltura" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- LOGO -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Logo da empresa" android:textStyle="bold" android:textSize="15sp"
+                android:textColor="@color/text_primary" android:layout_marginBottom="4dp" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="Incluir logo" android:textSize="14sp" />
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchLogo"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutLogo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:id="@+id/ivLogoPrevia"
+                        android:layout_width="64dp" android:layout_height="64dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/bg_search"
+                        android:scaleType="centerCrop" />
+
+                    <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:orientation="vertical">
+                        <TextView android:id="@+id/tvLogoSelecionada"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="Nenhuma logo selecionada"
+                            android:textColor="@color/text_secondary" android:textSize="12sp"
+                            android:layout_marginBottom="6dp" />
+                        <Button android:id="@+id/btnEscolherLogo"
+                            android:layout_width="wrap_content" android:layout_height="36dp"
+                            android:text="📁 Escolher imagem" android:textSize="12sp"
+                            android:backgroundTint="@color/primary" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button android:id="@+id/btnRemoverLogo"
+                    android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="Remover logo" android:textSize="11sp"
+                    android:backgroundTint="#B71C1C" />
+            </LinearLayout>
+
+            <!-- Campos validade (somente tipo VALIDADE) -->
+            <LinearLayout android:id="@+id/layoutCamposValidade"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Campos da etiqueta" android:textStyle="bold" android:textSize="15sp"
+                    android:textColor="@color/text_primary" android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="Nome do produto" android:textSize="14sp" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchNomeProduto"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="Data de produção" android:textSize="14sp" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchDataProducao"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:layout_marginBottom="6dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="Data de validade" android:textSize="14sp" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchDataValidade"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:layout_marginBottom="12dp">
+                    <TextView android:layout_width="0dp" android:layout_weight="1"
+                        android:layout_height="wrap_content" android:text="Exibir dias de validade" android:textSize="14sp" />
+                    <androidx.appcompat.widget.SwitchCompat android:id="@+id/switchDiasValidade"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Rótulo de produção" android:layout_marginBottom="10dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etLabelProducao" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:text="Produção:" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Rótulo de validade" android:layout_marginBottom="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etLabelValidade" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:text="Validade:" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+            <Button android:id="@+id/btnSalvar"
+                android:layout_width="match_parent" android:layout_height="52dp"
+                android:backgroundTint="@color/primary"
+                android:text="💾 Salvar Template"
+                android:textColor="@android:color/white" android:textSize="16sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

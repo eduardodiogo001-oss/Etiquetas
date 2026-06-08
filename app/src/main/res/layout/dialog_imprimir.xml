@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Prévia -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#FFFDE7" app:cardCornerRadius="8dp" app:cardElevation="3dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="14dp">
+            <TextView android:id="@+id/tvDialogProduto"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="18sp" android:textStyle="bold" android:textColor="#212121" />
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#E0E0E0" android:layout_marginTop="6dp" android:layout_marginBottom="6dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@+id/tvDialogAbertura"
+                    android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#424242" />
+                <TextView android:id="@+id/tvDialogDias"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:background="@drawable/bg_dias_badge"
+                    android:paddingStart="10dp" android:paddingEnd="10dp"
+                    android:paddingTop="3dp" android:paddingBottom="3dp"
+                    android:textColor="@android:color/white" android:textSize="11sp" android:textStyle="bold" />
+            </LinearLayout>
+            <TextView android:id="@+id/tvDialogValidade"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:textColor="#D32F2F"
+                android:textSize="15sp" android:textStyle="bold" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Template -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Modelo de etiqueta:" android:textSize="13sp" android:textColor="@color/text_secondary"
+        android:layout_marginBottom="4dp" />
+    <Spinner android:id="@+id/spinnerTemplate"
+        android:layout_width="match_parent" android:layout_height="44dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_search" android:paddingStart="8dp" />
+
+    <!-- Cópias -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Quantidade de cópias:" android:textSize="14sp" android:textStyle="bold"
+        android:textColor="#424242" android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="6dp" />
+    <NumberPicker android:id="@+id/npCopias"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>
