@@ -25,6 +25,7 @@ class EtiquetaLivreFragment : Fragment() {
     private lateinit var linhasAdapter: LinhaLivreAdapter
     private val linhas = mutableListOf<LinhaLivre>()
     private var templateAtual: EtiquetaTemplate? = null
+    private var templatesLivre: List<EtiquetaTemplate> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEtiquetaLivreBinding.inflate(inflater, container, false)
@@ -62,6 +63,10 @@ class EtiquetaLivreFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.templatesLivre.observe(viewLifecycleOwner) { lista ->
+            templatesLivre = lista
+        }
+
         viewModel.printState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is MainViewModel.PrintState.Printing -> binding.progressBar.visibility = View.VISIBLE
@@ -169,7 +174,7 @@ class EtiquetaLivreFragment : Fragment() {
     }
 
     private fun carregarTemplate() {
-        val lista = viewModel.templatesLivre.value ?: emptyList()
+        val lista = templatesLivre
         if (lista.isEmpty()) { Toast.makeText(requireContext(), "Nenhum template salvo", Toast.LENGTH_SHORT).show(); return }
         AlertDialog.Builder(requireContext())
             .setTitle("Carregar template")

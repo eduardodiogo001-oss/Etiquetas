@@ -14,5 +14,6 @@ data class Produto(
     val nome: String,
     val diasValidade: Int,
     val categoria: String = "",
-    val observacao: String = ""
+    val observacao: String = "",
+    val formaArmazenamento: String = ""
 )

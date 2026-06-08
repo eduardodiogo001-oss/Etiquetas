@@ -63,6 +63,7 @@ class PersonalizarEtiquetaActivity : AppCompatActivity() {
                 binding.etLabelProducao.setText(t.labelProducao)
                 binding.etLabelValidade.setText(t.labelValidade)
                 binding.switchNomeProduto.isChecked = t.mostrarNomeProduto
+                binding.switchArmazenamento.isChecked = t.mostrarArmazenamento
                 binding.switchDataProducao.isChecked = t.mostrarDataProducao
                 binding.switchDataValidade.isChecked = t.mostrarDataValidade
                 binding.switchDiasValidade.isChecked = t.mostrarDiasValidade
@@ -136,6 +137,7 @@ class PersonalizarEtiquetaActivity : AppCompatActivity() {
             mostrarLogo = mostrarLogo,
             logoPath = logoPath,
             mostrarNomeProduto = binding.switchNomeProduto.isChecked,
+            mostrarArmazenamento = binding.switchArmazenamento.isChecked,
             mostrarDataProducao = binding.switchDataProducao.isChecked,
             mostrarDataValidade = binding.switchDataValidade.isChecked,
             mostrarDiasValidade = binding.switchDiasValidade.isChecked,

@@ -25,6 +25,62 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Tipo de impressora -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tipo de Impressora"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/rgTipoImpressora"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+                <RadioButton android:id="@+id/rbZpl"
+                    android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Etiquetadora (ZPL)" android:checked="true" />
+                <RadioButton android:id="@+id/rbEscPos"
+                    android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Cupom Térmico (ESC/POS)" />
+            </RadioGroup>
+
+            <!-- Largura do papel (ESC/POS) -->
+            <LinearLayout
+                android:id="@+id/layoutPapel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Largura do papel:" android:textSize="14sp" />
+                <RadioGroup
+                    android:id="@+id/rgPapel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rb58mm"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="58 mm" />
+                    <RadioButton android:id="@+id/rb80mm"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="80 mm" android:checked="true" />
+                </RadioGroup>
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="#E0E0E0" android:layout_marginBottom="16dp" />
+
             <!-- Tipo de conexão -->
             <TextView
                 android:layout_width="wrap_content"

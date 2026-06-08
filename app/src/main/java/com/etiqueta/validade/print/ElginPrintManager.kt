@@ -18,13 +18,18 @@ import java.util.*
 object ElginPrintManager {
 
     enum class ConnectionType { TCP_IP, BLUETOOTH, USB }
+    enum class PrinterType { ZPL, ESCPOS }
 
     fun saveConfig(prefs: SharedPreferences, type: ConnectionType, ip: String = "",
-                   port: Int = 9100, btAddress: String = "") {
+                   port: Int = 9100, btAddress: String = "",
+                   printerType: PrinterType = PrinterType.ZPL, paperWidthMm: Int = 80) {
         prefs.edit()
             .putString("conn_type", type.name)
             .putString("ip", ip).putInt("port", port)
-            .putString("bt_address", btAddress).apply()
+            .putString("bt_address", btAddress)
+            .putString("printer_type", printerType.name)
+            .putInt("paper_width_mm", paperWidthMm)
+            .apply()
     }
 
     fun loadConfig(prefs: SharedPreferences) = PrintConfig(
@@ -32,23 +37,34 @@ object ElginPrintManager {
             prefs.getString("conn_type", ConnectionType.TCP_IP.name) ?: ConnectionType.TCP_IP.name),
         ip = prefs.getString("ip", "192.168.1.100") ?: "192.168.1.100",
         port = prefs.getInt("port", 9100),
-        btAddress = prefs.getString("bt_address", "") ?: ""
+        btAddress = prefs.getString("bt_address", "") ?: "",
+        printerType = PrinterType.valueOf(
+            prefs.getString("printer_type", PrinterType.ZPL.name) ?: PrinterType.ZPL.name),
+        paperWidthMm = prefs.getInt("paper_width_mm", 80)
     )
 
     data class PrintConfig(
         val connectionType: ConnectionType,
-        val ip: String, val port: Int, val btAddress: String
+        val ip: String, val port: Int, val btAddress: String,
+        val printerType: PrinterType = PrinterType.ZPL,
+        val paperWidthMm: Int = 80
     )
 
     // ─── Impressão de etiqueta de VALIDADE ───────────────────────────────────
 
     fun imprimirValidade(
         context: Context, config: PrintConfig,
-        nomeProduto: String, dataProducao: Date, dataValidade: Date,
+        nomeProduto: String, formaArmazenamento: String = "",
+        dataProducao: Date, dataValidade: Date,
         copias: Int, template: EtiquetaTemplate
     ) {
-        val zpl = buildZplValidade(context, template, nomeProduto, dataProducao, dataValidade, copias)
-        enviar(context, config, zpl)
+        if (config.printerType == PrinterType.ESCPOS) {
+            val bytes = buildEscPosValidade(config.paperWidthMm, nomeProduto, formaArmazenamento, dataProducao, dataValidade, copias, template)
+            enviarBytes(context, config, bytes)
+        } else {
+            val zpl = buildZplValidade(context, template, nomeProduto, formaArmazenamento, dataProducao, dataValidade, copias)
+            enviar(context, config, zpl)
+        }
     }
 
     // ─── Impressão de etiqueta LIVRE ─────────────────────────────────────────
@@ -66,61 +82,82 @@ object ElginPrintManager {
 
     private fun buildZplValidade(
         context: Context, t: EtiquetaTemplate,
-        nomeProduto: String, producao: Date, validade: Date, copias: Int
+        nomeProduto: String, formaArmazenamento: String,
+        producao: Date, validade: Date, copias: Int
     ): String {
         val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
         val w = t.larguraMm * 8
         val h = t.alturaMm * 8
+        val margin = 8
         return buildString {
             repeat(copias) {
                 append("^XA\n^PW$w\n^LL$h\n^CI28\n")
 
-                var y = 8
+                var y = margin
 
-                // Logo
-                if (t.mostrarLogo && t.logoPath.isNotBlank()) {
-                    val logoZpl = logoToZpl(t.logoPath, h - 16, 40)
-                    if (logoZpl != null) {
-                        append("^FO${w - 48},8$logoZpl\n")
-                    }
+                // ── Nome da loja (topo, se configurado) ──────────────────────
+                if (t.nomeLoja.isNotBlank()) {
+                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,18,18^FD${t.nomeLoja}^FS\n")
+                    y += 22
+                    append("^FO$margin,$y^GB${w - margin * 2},1,1^FS\n")
+                    y += 5
                 }
 
-                // Nome da loja
-                if (t.nomeLoja.isNotBlank()) {
-                    append("^FO10,$y^A0N,20,20^FD${t.nomeLoja}^FS\n")
-                    y += 26
-                    append("^FO8,$y^GB${w - 16},1,1^FS\n")
+                // ── Nome do produto: centralizado, negrito, grande ────────────
+                if (t.mostrarNomeProduto) {
+                    val fs = t.tamanhoFonteNome
+                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,$fs,$fs^FD${nomeProduto.take(24)}^FS\n")
+                    y += fs + 4
+                    // linha de destaque abaixo do nome
+                    append("^FO$margin,$y^GB${w - margin * 2},2,2^FS\n")
                     y += 6
                 }
 
-                // Nome do produto
-                if (t.mostrarNomeProduto) {
-                    val fs = t.tamanhoFonteNome
-                    append("^FO10,$y^A0N,$fs,$fs^FD${nomeProduto.take(20)}^FS\n")
-                    y += fs + 6
+                // ── Forma de armazenamento ────────────────────────────────────
+                if (t.mostrarArmazenamento && formaArmazenamento.isNotBlank()) {
+                    val fd = t.tamanhoFonteDatas
+                    append("^FO$margin,$y^A0N,$fd,$fd^FD$formaArmazenamento^FS\n")
+                    y += fd + 4
                 }
 
-                append("^FO8,$y^GB${w - 16},1,1^FS\n")
-                y += 6
-
-                val fd = t.tamanhoFonteDatas
-
-                // Data de produção
+                // ── Data de produção ──────────────────────────────────────────
                 if (t.mostrarDataProducao) {
-                    append("^FO10,$y^A0N,$fd,$fd^FD${t.labelProducao} ${fmt.format(producao)}^FS\n")
+                    val fd = t.tamanhoFonteDatas
+                    append("^FO$margin,$y^A0N,$fd,$fd^FD${t.labelProducao} ${fmt.format(producao)}^FS\n")
                     y += fd + 4
                 }
 
-                // Data de validade
-                if (t.mostrarDataValidade) {
-                    append("^FO10,$y^A0N,$fd,$fd^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
-                    y += fd + 4
-                }
-
-                // Dias de validade
+                // ── Dias de validade (opcional) ───────────────────────────────
                 if (t.mostrarDiasValidade) {
                     val diff = ((validade.time - producao.time) / 86400000).toInt()
-                    append("^FO10,$y^A0N,18,18^FDVálido por $diff dias^FS\n")
+                    append("^FO$margin,$y^A0N,18,18^FDVálido por $diff dias^FS\n")
+                    y += 26
+                }
+
+                // ── Data de validade: caixa dupla + centralizada negrito grande ─
+                if (t.mostrarDataValidade) {
+                    val fs = t.tamanhoFonteNome
+                    val boxH = fs + 18          // altura total da caixa
+                    val bx = margin             // x da caixa externa
+                    val bw = w - margin * 2     // largura da caixa
+                    // contorno único
+                    append("^FO$bx,$y^GB$bw,$boxH,1^FS\n")
+                    // texto centralizado dentro da caixa
+                    val ty = y + (boxH - fs) / 2
+                    append("^FO$bx,$ty^FB$bw,1,,C^A0N,$fs,$fs^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
+                    y += boxH + 4
+                }
+
+                // ── Logo: canto inferior direito, sem fundo ───────────────────
+                if (t.mostrarLogo && t.logoPath.isNotBlank()) {
+                    val logoH = minOf(32, h - y - margin)
+                    val logoW = logoH
+                    if (logoH > 4) {
+                        val logoZpl = logoToZpl(t.logoPath, logoH, logoW)
+                        if (logoZpl != null) {
+                            append("^FO${w - logoW - margin},${h - logoH - margin}$logoZpl\n")
+                        }
+                    }
                 }
 
                 append("^XZ\n")
@@ -196,46 +233,138 @@ object ElginPrintManager {
         } catch (e: Exception) { null }
     }
 
+    // ─── ESC/POS Builder ────────────────────────────────────────────────────
+
+    private fun buildEscPosValidade(
+        paperWidthMm: Int,
+        nomeProduto: String, formaArmazenamento: String,
+        producao: Date, validade: Date, copias: Int,
+        t: EtiquetaTemplate
+    ): ByteArray {
+        val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+        val cols = if (paperWidthMm >= 80) 48 else 32
+        val sep = "-".repeat(cols)
+
+        val ESC = 0x1B.toByte(); val GS = 0x1D.toByte(); val LF = 0x0A.toByte()
+        fun cmd(vararg b: Int) = b.map { it.toByte() }.toByteArray()
+
+        val init       = cmd(0x1B, 0x40)            // ESC @ initialize
+        val center     = cmd(0x1B, 0x61, 0x01)      // ESC a 1 center
+        val left       = cmd(0x1B, 0x61, 0x00)      // ESC a 0 left
+        val boldOn     = cmd(0x1B, 0x45, 0x01)      // ESC E 1
+        val boldOff    = cmd(0x1B, 0x45, 0x00)      // ESC E 0
+        val dblSize    = cmd(0x1D, 0x21, 0x11)      // GS ! double w+h
+        val normalSize = cmd(0x1D, 0x21, 0x00)      // GS ! normal
+        val cut        = cmd(0x1D, 0x56, 0x42, 0x08) // GS V B partial cut
+
+        val out = ByteArrayOutputStream()
+        fun w(b: ByteArray) = out.write(b)
+        fun w(s: String)    = out.write(s.toByteArray(Charsets.UTF_8))
+        fun nl()            = out.write(byteArrayOf(LF))
+
+        repeat(copias) {
+            w(init)
+
+            // Nome da loja
+            if (t.nomeLoja.isNotBlank()) {
+                w(center); w(boldOn)
+                w(t.nomeLoja.take(cols)); nl()
+                w(boldOff); w(left)
+                w(sep); nl()
+            }
+
+            // Nome do produto — centralizado, duplo, negrito
+            if (t.mostrarNomeProduto) {
+                w(center); w(boldOn); w(dblSize)
+                w(nomeProduto.take(cols / 2)); nl()
+                w(normalSize); w(boldOff); w(left)
+                w(sep); nl()
+            }
+
+            // Forma de armazenamento
+            if (t.mostrarArmazenamento && formaArmazenamento.isNotBlank()) {
+                w(left); w(formaArmazenamento.take(cols)); nl()
+            }
+
+            // Data de produção
+            if (t.mostrarDataProducao) {
+                w(left); w("${t.labelProducao} ${fmt.format(producao)}"); nl()
+            }
+
+            // Dias de validade
+            if (t.mostrarDiasValidade) {
+                val diff = ((validade.time - producao.time) / 86400000).toInt()
+                w(left); w("Valido por $diff dias"); nl()
+            }
+
+            // Data de validade — centralizada, duplo, negrito, com moldura
+            if (t.mostrarDataValidade) {
+                val moldura = "*".repeat(cols)
+                w(left); w(moldura); nl()
+                w(center); w(boldOn); w(dblSize)
+                w("${t.labelValidade} ${fmt.format(validade)}"); nl()
+                w(normalSize); w(boldOff); w(left)
+                w(moldura); nl()
+            }
+
+            nl(); nl(); nl()
+            w(cut)
+        }
+        return out.toByteArray()
+    }
+
     // ─── Envio ───────────────────────────────────────────────────────────────
+
+    private fun enviarBytes(context: Context, config: PrintConfig, data: ByteArray) {
+        when (config.connectionType) {
+            ConnectionType.TCP_IP    -> tcpEnviar(config.ip, config.port, data)
+            ConnectionType.BLUETOOTH -> btEnviar(config.btAddress, data)
+            ConnectionType.USB       -> usbEnviar(context, data)
+        }
+    }
 
     private fun enviar(context: Context, config: PrintConfig, zpl: String) {
         when (config.connectionType) {
-            ConnectionType.TCP_IP -> printViaTcp(config.ip, config.port, zpl)
-            ConnectionType.BLUETOOTH -> printViaBluetooth(context, config.btAddress, zpl)
-            ConnectionType.USB -> printViaUsb(context, zpl)
+            ConnectionType.TCP_IP    -> tcpEnviar(config.ip, config.port, zpl.toByteArray(Charsets.UTF_8))
+            ConnectionType.BLUETOOTH -> btEnviar(config.btAddress, zpl.toByteArray(Charsets.UTF_8))
+            ConnectionType.USB       -> usbEnviar(context, zpl.toByteArray(Charsets.UTF_8))
         }
     }
 
-    private fun printViaTcp(ip: String, port: Int, zpl: String) {
-        Socket(ip, port).use { socket ->
+    private fun tcpEnviar(ip: String, port: Int, data: ByteArray) {
+        if (ip.isBlank()) throw IllegalStateException("IP não configurado. Acesse as configurações.")
+        Socket().use { socket ->
+            socket.connect(java.net.InetSocketAddress(ip, port), 5000)
             socket.soTimeout = 5000
-            socket.getOutputStream().apply { write(zpl.toByteArray(Charsets.UTF_8)); flush() }
+            socket.getOutputStream().run { write(data); flush() }
         }
     }
 
-    private fun printViaBluetooth(context: Context, address: String, zpl: String) {
-        if (address.isBlank()) throw IllegalStateException("Endereço Bluetooth não configurado")
+    private fun btEnviar(address: String, data: ByteArray) {
+        if (address.isBlank()) throw IllegalStateException("Endereço Bluetooth não configurado.")
         val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
             ?: throw IllegalStateException("Bluetooth não disponível")
-        val socket = adapter.getRemoteDevice(address)
+        val btSocket = adapter.getRemoteDevice(address)
             .createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
-        socket.connect()
-        socket.outputStream.use { it.write(zpl.toByteArray(Charsets.UTF_8)); it.flush() }
-        socket.close()
+        try {
+            btSocket.connect()
+            btSocket.outputStream.run { write(data); flush() }
+        } finally {
+            btSocket.close()
+        }
     }
 
-    private fun printViaUsb(context: Context, zpl: String) {
+    private fun usbEnviar(context: Context, data: ByteArray) {
         val usbManager = context.getSystemService(Context.USB_SERVICE) as android.hardware.usb.UsbManager
         val device = usbManager.deviceList.values.firstOrNull()
             ?: throw IllegalStateException("Nenhuma impressora USB encontrada")
         val connection = usbManager.openDevice(device)
-            ?: throw IllegalStateException("Sem permissão USB")
+            ?: throw IllegalStateException("Sem permissão USB. Reconecte o cabo e tente novamente.")
         val iface = device.getInterface(0)
         val endpoint = (0 until iface.endpointCount).map { iface.getEndpoint(it) }
             .firstOrNull { it.direction == android.hardware.usb.UsbConstants.USB_DIR_OUT }
             ?: throw IllegalStateException("Endpoint USB não encontrado")
         connection.claimInterface(iface, true)
-        val data = zpl.toByteArray(Charsets.UTF_8)
         connection.bulkTransfer(endpoint, data, data.size, 5000)
         connection.releaseInterface(iface)
         connection.close()
