@@ -28,6 +28,7 @@ class ValidadeFragment : Fragment() {
     private lateinit var adapter: com.etiqueta.validade.ui.ProdutoAdapter
     private val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
     private var dataProducao = Date()
+    private var templatesValidade: List<EtiquetaTemplate> = emptyList()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentValidadeBinding.inflate(inflater, container, false)
@@ -85,6 +86,10 @@ class ValidadeFragment : Fragment() {
             binding.tvSemProdutos.visibility = if (lista.isEmpty()) View.VISIBLE else View.GONE
         }
 
+        viewModel.templatesValidade.observe(viewLifecycleOwner) { lista ->
+            templatesValidade = lista
+        }
+
         viewModel.printState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is MainViewModel.PrintState.Idle -> binding.progressBar.visibility = View.GONE
@@ -107,8 +112,8 @@ class ValidadeFragment : Fragment() {
     }
 
     private fun mostrarDialogImprimir(produto: Produto) {
-        val templates = viewModel.templatesValidade.value
-            ?.takeIf { it.isNotEmpty() }
+        val templates = templatesValidade
+            .takeIf { it.isNotEmpty() }
             ?: listOf(EtiquetaTemplate(nome = "Padrão", tipo = EtiquetaTemplate.TIPO_VALIDADE))
 
         val validade = viewModel.calcularValidade(produto, dataProducao)
