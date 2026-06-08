@@ -119,17 +119,34 @@ class ValidadeFragment : Fragment() {
         val validade = viewModel.calcularValidade(produto, dataProducao)
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_imprimir, null)
 
-        view.findViewById<TextView>(R.id.tvDialogProduto).text = produto.nome
-        view.findViewById<TextView>(R.id.tvDialogAbertura).text = "Produção: ${fmt.format(dataProducao)}"
-        view.findViewById<TextView>(R.id.tvDialogValidade).text = "Validade: ${fmt.format(validade)}"
-        view.findViewById<TextView>(R.id.tvDialogDias).text = "${produto.diasValidade} dias"
+        val tvProduto  = view.findViewById<TextView>(R.id.tvDialogProduto)
+        val tvAbertura = view.findViewById<TextView>(R.id.tvDialogAbertura)
+        val tvValidade = view.findViewById<TextView>(R.id.tvDialogValidade)
+        val tvDias     = view.findViewById<TextView>(R.id.tvDialogDias)
+
+        tvProduto.text  = produto.nome
+        tvAbertura.text = "Produção: ${fmt.format(dataProducao)}"
+        tvValidade.text = "Validade: ${fmt.format(validade)}"
+        tvDias.text     = "${produto.diasValidade} dias"
+
+        fun aplicarTemplate(t: EtiquetaTemplate) {
+            tvProduto.visibility  = if (t.mostrarNomeProduto)  View.VISIBLE else View.GONE
+            tvAbertura.visibility = if (t.mostrarDataProducao) View.VISIBLE else View.GONE
+            tvValidade.visibility = if (t.mostrarDataValidade) View.VISIBLE else View.GONE
+            tvDias.visibility     = if (t.mostrarDiasValidade) View.VISIBLE else View.GONE
+        }
 
         val np = view.findViewById<NumberPicker>(R.id.npCopias).apply { minValue = 1; maxValue = 50; value = 1 }
 
-        // Spinner de template
         val spinner = view.findViewById<Spinner>(R.id.spinnerTemplate)
-        val nomes = templates.map { it.nome }
-        spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, nomes)
+        spinner.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, templates.map { it.nome })
+        aplicarTemplate(templates[0])
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
+                aplicarTemplate(templates[pos])
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
         AlertDialog.Builder(requireContext())
             .setTitle("Imprimir Etiqueta de Validade")
