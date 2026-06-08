@@ -119,10 +119,14 @@ class ValidadeFragment : Fragment() {
         val validade = viewModel.calcularValidade(produto, dataProducao)
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_imprimir, null)
 
-        val tvProduto  = view.findViewById<TextView>(R.id.tvDialogProduto)
-        val tvAbertura = view.findViewById<TextView>(R.id.tvDialogAbertura)
-        val tvValidade = view.findViewById<TextView>(R.id.tvDialogValidade)
-        val tvDias     = view.findViewById<TextView>(R.id.tvDialogDias)
+        val tvNomeLoja   = view.findViewById<TextView>(R.id.tvDialogNomeLoja)
+        val dividerLoja  = view.findViewById<View>(R.id.dividerLoja)
+        val tvProduto    = view.findViewById<TextView>(R.id.tvDialogProduto)
+        val tvAbertura   = view.findViewById<TextView>(R.id.tvDialogAbertura)
+        val tvValidade   = view.findViewById<TextView>(R.id.tvDialogValidade)
+        val tvDias       = view.findViewById<TextView>(R.id.tvDialogDias)
+        val ivLogo       = view.findViewById<android.widget.ImageView>(R.id.ivDialogLogo)
+        val tvDimensoes  = view.findViewById<TextView>(R.id.tvDialogDimensoes)
 
         tvProduto.text  = produto.nome
         tvAbertura.text = "Produção: ${fmt.format(dataProducao)}"
@@ -130,10 +134,37 @@ class ValidadeFragment : Fragment() {
         tvDias.text     = "${produto.diasValidade} dias"
 
         fun aplicarTemplate(t: EtiquetaTemplate) {
+            // Nome da loja
+            if (t.nomeLoja.isNotBlank()) {
+                tvNomeLoja.text = t.nomeLoja
+                tvNomeLoja.visibility = View.VISIBLE
+                dividerLoja.visibility = View.VISIBLE
+            } else {
+                tvNomeLoja.visibility = View.GONE
+                dividerLoja.visibility = View.GONE
+            }
+
+            // Logo
+            if (t.mostrarLogo && t.logoPath.isNotBlank()) {
+                val file = java.io.File(t.logoPath)
+                if (file.exists()) {
+                    ivLogo.setImageURI(android.net.Uri.fromFile(file))
+                    ivLogo.visibility = View.VISIBLE
+                } else {
+                    ivLogo.visibility = View.GONE
+                }
+            } else {
+                ivLogo.visibility = View.GONE
+            }
+
+            // Campos de texto
             tvProduto.visibility  = if (t.mostrarNomeProduto)  View.VISIBLE else View.GONE
             tvAbertura.visibility = if (t.mostrarDataProducao) View.VISIBLE else View.GONE
             tvValidade.visibility = if (t.mostrarDataValidade) View.VISIBLE else View.GONE
             tvDias.visibility     = if (t.mostrarDiasValidade) View.VISIBLE else View.GONE
+
+            // Dimensões
+            tvDimensoes.text = "${t.larguraMm} × ${t.alturaMm} mm"
         }
 
         val np = view.findViewById<NumberPicker>(R.id.npCopias).apply { minValue = 1; maxValue = 50; value = 1 }

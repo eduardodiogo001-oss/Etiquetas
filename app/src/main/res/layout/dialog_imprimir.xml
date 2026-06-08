@@ -6,34 +6,137 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <!-- Prévia -->
+    <!-- Prévia da etiqueta -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Prévia da etiqueta:" android:textSize="13sp"
+        android:textColor="#757575" android:layout_marginBottom="6dp" />
+
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:id="@+id/cardPrevia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:cardBackgroundColor="#FFFDE7" app:cardCornerRadius="8dp" app:cardElevation="3dp">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="14dp">
-            <TextView android:id="@+id/tvDialogProduto"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:textSize="18sp" android:textStyle="bold" android:textColor="#212121" />
-            <View android:layout_width="match_parent" android:layout_height="1dp"
-                android:background="#E0E0E0" android:layout_marginTop="6dp" android:layout_marginBottom="6dp" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:orientation="horizontal" android:gravity="center_vertical">
-                <TextView android:id="@+id/tvDialogAbertura"
-                    android:layout_width="0dp" android:layout_weight="1"
-                    android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#424242" />
-                <TextView android:id="@+id/tvDialogDias"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:background="@drawable/bg_dias_badge"
-                    android:paddingStart="10dp" android:paddingEnd="10dp"
-                    android:paddingTop="3dp" android:paddingBottom="3dp"
-                    android:textColor="@android:color/white" android:textSize="11sp" android:textStyle="bold" />
+        app:cardBackgroundColor="#FFFDE7"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="3dp">
+
+        <LinearLayout
+            android:id="@+id/layoutPrevia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <!-- Nome da loja -->
+            <TextView
+                android:id="@+id/tvDialogNomeLoja"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#5D4037"
+                android:layout_marginBottom="4dp"
+                android:visibility="gone" />
+
+            <!-- Linha separadora loja -->
+            <View
+                android:id="@+id/dividerLoja"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginBottom="6dp"
+                android:visibility="gone" />
+
+            <!-- Logo + campos lado a lado -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- Conteúdo de texto -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvDialogProduto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#212121" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="6dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvDialogAbertura"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:textSize="13sp"
+                            android:textColor="#424242" />
+
+                        <TextView
+                            android:id="@+id/tvDialogDias"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_dias_badge"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:textColor="@android:color/white"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvDialogValidade"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#D32F2F"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Logo (lado direito) -->
+                <ImageView
+                    android:id="@+id/ivDialogLogo"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="12dp"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/bg_search"
+                    android:visibility="gone" />
+
             </LinearLayout>
-            <TextView android:id="@+id/tvDialogValidade"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="4dp" android:textColor="#D32F2F"
-                android:textSize="15sp" android:textStyle="bold" />
+
+            <!-- Dimensões da etiqueta -->
+            <TextView
+                android:id="@+id/tvDialogDimensoes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="11sp"
+                android:textColor="#9E9E9E"
+                android:text="50 × 30 mm" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
