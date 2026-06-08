@@ -20,6 +20,7 @@ class ConfiguracaoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityConfiguracaoBinding
     private val prefs by lazy { getSharedPreferences("config", MODE_PRIVATE) }
     private var tipoConexao = ElginPrintManager.ConnectionType.TCP_IP
+    private var tipoImpressora = ElginPrintManager.PrinterType.ZPL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,10 +31,20 @@ class ConfiguracaoActivity : AppCompatActivity() {
         supportActionBar?.title = "Configurações da Impressora"
 
         carregarConfig()
+        setupTipoImpressora()
         setupTipoConexao()
 
         binding.btnSalvarConfig.setOnClickListener { salvarConfig() }
         binding.btnScanBluetooth.setOnClickListener { buscarDispBluetooth() }
+    }
+
+    private fun setupTipoImpressora() {
+        binding.rgTipoImpressora.setOnCheckedChangeListener { _, id ->
+            tipoImpressora = if (id == R.id.rbEscPos) ElginPrintManager.PrinterType.ESCPOS
+                             else ElginPrintManager.PrinterType.ZPL
+            binding.layoutPapel.visibility =
+                if (tipoImpressora == ElginPrintManager.PrinterType.ESCPOS) View.VISIBLE else View.GONE
+        }
     }
 
     private fun setupTipoConexao() {
@@ -67,6 +78,16 @@ class ConfiguracaoActivity : AppCompatActivity() {
             ElginPrintManager.ConnectionType.USB       -> binding.rbUsb.isChecked = true
         }
 
+        tipoImpressora = config.printerType
+        if (config.printerType == ElginPrintManager.PrinterType.ESCPOS) {
+            binding.rbEscPos.isChecked = true
+            binding.layoutPapel.visibility = View.VISIBLE
+        } else {
+            binding.rbZpl.isChecked = true
+        }
+        if (config.paperWidthMm == 58) binding.rb58mm.isChecked = true
+        else binding.rb80mm.isChecked = true
+
         binding.etIp.setText(config.ip)
         binding.etPorta.setText(config.port.toString())
         binding.etBtAddress.setText(config.btAddress)
@@ -75,11 +96,12 @@ class ConfiguracaoActivity : AppCompatActivity() {
     }
 
     private fun salvarConfig() {
-        val ip       = binding.etIp.text.toString().trim()
-        val port     = binding.etPorta.text.toString().toIntOrNull() ?: 9100
+        val ip        = binding.etIp.text.toString().trim()
+        val port      = binding.etPorta.text.toString().toIntOrNull() ?: 9100
         val btAddress = binding.etBtAddress.text.toString().trim()
+        val paperWidth = if (binding.rb58mm.isChecked) 58 else 80
 
-        ElginPrintManager.saveConfig(prefs, tipoConexao, ip, port, btAddress)
+        ElginPrintManager.saveConfig(prefs, tipoConexao, ip, port, btAddress, tipoImpressora, paperWidth)
         Toast.makeText(this, "Configurações salvas!", Toast.LENGTH_SHORT).show()
         finish()
     }
