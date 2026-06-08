@@ -41,8 +41,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return cal.time
     }
 
-    fun imprimirValidade(context: Context, produto: Produto, dataProducao: Date, copias: Int, template: EtiquetaTemplate) {
-        val config = ElginPrintManager.loadConfig(context.getSharedPreferences("config", Context.MODE_PRIVATE))
+    fun imprimirValidade(context: Context, produto: Produto, dataProducao: Date, copias: Int,
+                         template: EtiquetaTemplate,
+                         printerTypeOverride: ElginPrintManager.PrinterType? = null) {
+        val baseConfig = ElginPrintManager.loadConfig(context.getSharedPreferences("config", Context.MODE_PRIVATE))
+        val config = if (printerTypeOverride != null) baseConfig.copy(printerType = printerTypeOverride) else baseConfig
         val validade = calcularValidade(produto, dataProducao)
         viewModelScope.launch(Dispatchers.IO) {
             _printState.postValue(PrintState.Printing)

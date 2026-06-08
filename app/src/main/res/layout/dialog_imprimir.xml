@@ -149,6 +149,27 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Formato de impressão -->
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Formato:" android:textSize="13sp" android:textColor="@color/text_secondary"
+        android:layout_marginBottom="4dp" />
+    <RadioGroup
+        android:id="@+id/rgFormato"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+        <RadioButton android:id="@+id/rbFormatoEtiqueta"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="🏷️ Etiqueta (ZPL)"
+            android:checked="true" />
+        <RadioButton android:id="@+id/rbFormatoCupom"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="🧾 Cupom (ESC/POS)" />
+    </RadioGroup>
+
     <!-- Template -->
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:text="Modelo de etiqueta:" android:textSize="13sp" android:textColor="@color/text_secondary"

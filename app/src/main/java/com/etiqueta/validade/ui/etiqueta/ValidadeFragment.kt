@@ -184,12 +184,18 @@ class ValidadeFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
+        val rgFormato = view.findViewById<android.widget.RadioGroup>(R.id.rgFormato)
+
         AlertDialog.Builder(requireContext())
             .setTitle("Imprimir Etiqueta de Validade")
             .setView(view)
             .setPositiveButton("🖨 Imprimir") { _, _ ->
                 val template = templates[spinner.selectedItemPosition]
-                viewModel.imprimirValidade(requireContext(), produto, dataProducao, np.value, template)
+                val formato = if (rgFormato.checkedRadioButtonId == R.id.rbFormatoCupom)
+                    com.etiqueta.validade.print.ElginPrintManager.PrinterType.ESCPOS
+                else
+                    com.etiqueta.validade.print.ElginPrintManager.PrinterType.ZPL
+                viewModel.imprimirValidade(requireContext(), produto, dataProducao, np.value, template, formato)
             }
             .setNeutralButton("✏️ Personalizar") { _, _ ->
                 val intent = Intent(requireContext(), PersonalizarEtiquetaActivity::class.java)
