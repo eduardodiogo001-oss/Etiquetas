@@ -116,16 +116,23 @@ object ElginPrintManager {
                 if (t.mostrarDiasValidade) {
                     val diff = ((validade.time - producao.time) / 86400000).toInt()
                     append("^FO$margin,$y^A0N,18,18^FDVálido por $diff dias^FS\n")
-                    y += 22
+                    y += 26
                 }
 
-                // ── Data de validade: centralizada, negrito, grande, destaque ─
+                // ── Data de validade: caixa dupla + centralizada negrito grande ─
                 if (t.mostrarDataValidade) {
                     val fs = t.tamanhoFonteNome
-                    append("^FO$margin,$y^GB${w - margin * 2},2,2^FS\n")
-                    y += 5
-                    append("^FO$margin,$y^FB${w - margin * 2},1,,C^A0N,$fs,$fs^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
-                    y += fs + 4
+                    val boxH = fs + 18          // altura total da caixa
+                    val bx = margin             // x da caixa externa
+                    val bw = w - margin * 2     // largura da caixa
+                    // contorno externo
+                    append("^FO$bx,$y^GB$bw,$boxH,1^FS\n")
+                    // contorno interno (linha dupla: 3px de gap)
+                    append("^FO${bx + 3},${y + 3}^GB${bw - 6},${boxH - 6},1^FS\n")
+                    // texto centralizado dentro da caixa
+                    val ty = y + (boxH - fs) / 2
+                    append("^FO$bx,$ty^FB$bw,1,,C^A0N,$fs,$fs^FD${t.labelValidade} ${fmt.format(validade)}^FS\n")
+                    y += boxH + 4
                 }
 
                 // ── Logo: canto inferior direito, sem fundo ───────────────────

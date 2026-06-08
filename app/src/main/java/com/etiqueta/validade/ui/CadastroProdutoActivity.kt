@@ -20,11 +20,7 @@ class CadastroProdutoActivity : AppCompatActivity() {
         "Não especificado",
         "Resfriado (2°C a 8°C)",
         "Congelado (-18°C ou abaixo)",
-        "Temperatura ambiente",
-        "Refrigerado após aberto",
-        "Local fresco e seco",
-        "Ao abrigo da luz e calor",
-        "Refrigerado e ao abrigo da luz"
+        "Temperatura ambiente"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
